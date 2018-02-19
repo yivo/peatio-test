@@ -1,5 +1,7 @@
 dist: trusty
 
+script: echo "OK"
+
 # Execute all of the commands which need to be executed after the build passed.
 after_success: |
   if [[ -n ${GITHUB_API_KEY} ]]; then
