@@ -9,5 +9,5 @@ after_success: |
     git config --global user.name "Travis CI"
     export GIT_TAG=build-$TRAVIS_BRANCH-$(date -u "+%Y-%m-%d-%H-%M-%S")-$TRAVIS_BUILD_NUMBER
     git tag $GIT_TAG -a -m "Generated tag from TravisCI build $TRAVIS_BUILD_NUMBER"
-    git push $GIT_TAG https://yivo:${GITHUB_API_KEY}@github.com/yivo/peatio-test
+    git push https://yivo:${GITHUB_API_KEY}@github.com/yivo/peatio-test $GIT_TAG
   fi
