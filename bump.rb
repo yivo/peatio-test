@@ -9,16 +9,16 @@ end
 
 def bump_from_version_specific_branch(name)
   # This helps to ensure branch does exist.
-  branch = version_specific_branches.find { |b| b["name"] == name }
+  branch = version_specific_branches.find { |b| b[:name] == name }
   return unless branch
 
   # Find latest version for the branch (compare by major and minor).
   # We use find here since versions are sorted in descending order.
-  latest_version = versions.reverse.find { |v| v.segments[1...3] == branch[:version].segments[1...3] }
+  latest_version = versions.reverse.find { |v| v.segments[0...2] == branch[:version].segments }
   return unless latest_version
 
   # Increment patch version, tag, and push.
-  candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[2] += 1 })
+  candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[2] += 1 }.join("."))
   tag_n_push(candidate_version.to_s)
 end
 
