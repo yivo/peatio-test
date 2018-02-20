@@ -23,9 +23,9 @@ def bump_from_version_specific_branch(name)
 end
 
 def tag_n_push(tag)
-  %x( git config --global user.email "builds@travis-ci.com" )
-  %x( git config --global user.name "Travis CI" )
-  %x( git tag #{tag} -a -m "Generated tag from TravisCI build #{ENV["TRAVIS_BUILD_NUMBER"]}" )
+  %x( git config --global user.email "bot@peatio-test.com" )
+  %x( git config --global user.name "Peatio Test" )
+  %x( git tag #{tag} -a -m "Automatically generated tag from TravisCI build #{ENV.fetch("TRAVIS_BUILD_NUMBER")}." )
   %x( git push https://yivo:#{ENV.fetch("GITHUB_API_KEY")}@github.com/yivo/peatio-test #{tag} )
 end
 
@@ -47,14 +47,19 @@ end
 def generic_semver?(version)
   version.segments.count == 3 && version.segments.all? { |segment| segment.match?(/\A[0-9]+\z/) }
 end
-binding.pry
 
-if ENV["TRAVIS_REPO_SLUG"] == "yivo/peatio-test" &&
-  ENV["TRAVIS_PULL_REQUEST"] == "false" &&
-  !ENV["TRAVIS_BRANCH"].to_s.empty? &&
-  !ENV["GITHUB_API_KEY"].to_s.empty? &&
-  ENV["TRAVIS_TAG"].to_s.empty?
+# Build must not run on a fork.
+bump   = ENV["TRAVIS_REPO_SLUG"] == "yivo/peatio-test"
+# Skip PRs.
+bump &&= ENV["TRAVIS_PULL_REQUEST"] == "false"
+# Build must run on branch.
+bump &&= !ENV["TRAVIS_BRANCH"].to_s.empty?
+# GitHub API key must be available.
+bump &&= !ENV["GITHUB_API_KEY"].to_s.empty?
+# Build must not run on tag.
+bump &&= ENV["TRAVIS_TAG"].to_s.empty?
 
+if bump
   if ENV["TRAVIS_BRANCH"] == "master"
     bump_from_master_branch
   else
