@@ -37,23 +37,28 @@ def tag_n_push(tag)
 end
 
 def versions
-  puts github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/tags?access_token=")
-
-  @versions ||= github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/tags?access_token=").map do |x|
+  @versions ||= github_api_authenticated_get("/repos/yivo/peatio-test/tags").map do |x|
     Gem::Version.new(x.fetch("name"))
   end.sort
 end
 
 def version_specific_branches
-  @branches ||= github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/branches").map do |x|
+  @branches ||= github_api_authenticated_get("/repos/yivo/peatio-test/branches").map do |x|
     if x.fetch("name") =~ /\A(\d)-(\d)-\w+\z/
       { name: x["name"], version: Gem::Version.new($1 + "." + $2) }
     end
   end.compact
 end
 
-def github_api_authenticated_get(url)
-  JSON.load(Net::HTTP.get(URI.parse(url + "?access_token=" + ENV.fetch("GITHUB_API_KEY"))))
+def github_api_authenticated_get(path)
+  http         = Net::HTTP.new("api.github.com", 443)
+  http.use_ssl = true
+  response     = http.get path, "Authorization" => %[token #{ENV.fetch("GITHUB_API_KEY")}]
+  if response.code.to_i == 200
+    JSON.load(response.body)
+  else
+    raise StandardError, %[HTTP #{response.code}: "#{response.body}".]
+  end
 end
 
 def generic_semver?(version)
