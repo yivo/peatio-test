@@ -2,6 +2,7 @@ require "rubygems/version"
 require "net/http"
 require "json"
 require "uri"
+# require "pry-byebug"
 
 def bump_from_master_branch
   return unless (latest_version = versions.last)
