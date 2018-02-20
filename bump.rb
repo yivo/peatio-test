@@ -19,7 +19,7 @@ def bump_from_version_specific_branch(name)
 
   # Increment patch version, tag, and push.
   candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[2] += 1 }.join("."))
-  tag_n_push(candidate_version.to_s)
+  tag_n_push(candidate_version.to_s) unless versions.include?(candidate_version)
 end
 
 def tag_n_push(tag)
@@ -32,7 +32,7 @@ end
 def versions
   JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/tags"))).map do |x|
     Gem::Version.new(x.fetch("name"))
-  end
+  end.sort
 end
 
 def version_specific_branches
@@ -47,6 +47,7 @@ end
 def generic_semver?(version)
   version.segments.count == 3 && version.segments.all? { |segment| segment.match?(/\A[0-9]+\z/) }
 end
+binding.pry
 
 if ENV["TRAVIS_REPO_SLUG"] == "yivo/peatio-test" &&
   ENV["TRAVIS_PULL_REQUEST"] == "false" &&
