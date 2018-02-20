@@ -159,6 +159,8 @@ bump &&= !ENV["TRAVIS_BRANCH"].to_s.empty?
 bump &&= !ENV["GITHUB_API_KEY"].to_s.empty?
 # Build must not run on tag.
 bump &&= ENV["TRAVIS_TAG"].to_s.empty?
+# Ensure this commit is not tagged.
+bump &&= !versions.find { |v| v[:commit] == ENV["TRAVIS_COMMIT"] }
 
 if bump
   if ENV["TRAVIS_BRANCH"] == "master"
