@@ -111,6 +111,17 @@ def versions
 end
 
 #
+# Returns hash with all tagged commits as keys (SHA-1) and versions as values.
+#
+# @return [Hash]
+#   Key is commit's SHA-1 hash, value is instance of Gem::Version.
+def tagged_commits_mapping
+  @commits ||= github_api_authenticated_get("/repos/#{repository_slug}/tags").each_with_object({}) do |x, memo|
+    memo[x.fetch("commit").fetch("sha")] = Gem::Version.new(x.fetch("name"))
+  end
+end
+
+#
 # Loads all Peatio branches, selects only version-specific, and returns them.
 #
 # @return [Array<Hash>]
@@ -160,7 +171,7 @@ bump &&= !ENV["GITHUB_API_KEY"].to_s.empty?
 # Build must not run on tag.
 bump &&= ENV["TRAVIS_TAG"].to_s.empty?
 # Ensure this commit is not tagged.
-bump &&= !versions.find { |v| v[:commit] == ENV["TRAVIS_COMMIT"] }
+bump &&= !tagged_commits_mapping.key?(ENV["TRAVIS_COMMIT"])
 
 if bump
   if ENV["TRAVIS_BRANCH"] == "master"
