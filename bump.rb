@@ -10,7 +10,7 @@ def bump_from_master_branch
   linked_branch = version_specific_branches.find { |b| b[:version].segments == latest_version.segments[0...2] }
   return if linked_branch
 
-  candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[1] += 1; s[2] = 0 }.join("."))
+  candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[2] += 1 }.join("."))
   tag_n_push(candidate_version.to_s) unless versions.include?(candidate_version)
 end
 
@@ -37,17 +37,21 @@ def tag_n_push(tag)
 end
 
 def versions
-  @versions ||= JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/tags"))).map do |x|
+  @versions ||= github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/tags?access_token=").map do |x|
     Gem::Version.new(x.fetch("name"))
   end.sort
 end
 
 def version_specific_branches
-  @branches ||= JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/branches"))).map do |x|
+  @branches ||= github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/branches").map do |x|
     if x.fetch("name") =~ /\A(\d)-(\d)-\w+\z/
       { name: x["name"], version: Gem::Version.new($1 + "." + $2) }
     end
   end.compact
+end
+
+def github_api_authenticated_get(url)
+  JSON.load(Net::HTTP.get(URI.parse(url + "?access_token=" + ENV.fetch("GITHUB_API_KEY"))))
 end
 
 def generic_semver?(version)
