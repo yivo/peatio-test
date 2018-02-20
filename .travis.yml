@@ -2,7 +2,7 @@ dist: trusty
 
 language: ruby
 
-script: echo "OK"
+script: env
 
 # Execute all of the commands which need to be executed after the build passed.
 after_success: ruby bump.rb
