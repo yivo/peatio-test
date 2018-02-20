@@ -4,6 +4,8 @@ require "json"
 require "uri"
 # require "pry-byebug"
 
+# x
+
 def bump_from_master_branch
   return unless (latest_version = versions.last)
 
