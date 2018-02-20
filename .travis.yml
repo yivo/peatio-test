@@ -1,8 +1,11 @@
 dist: trusty
 
+env:
+  - BOT_USERNAME=yivo BOT_NAME="Peatio Test (Yaroslav Konoplov)" BOT_EMAIL=eahome00@gmail.com REPOSITORY_SLUG=yivo/peatio-test
+
 language: ruby
 
 script: env
 
 # Execute all of the commands which need to be executed after the build passed.
-after_success: ruby bump.rb
+after_success: ruby bump.rb --trace
