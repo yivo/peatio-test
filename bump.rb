@@ -37,6 +37,8 @@ def tag_n_push(tag)
 end
 
 def versions
+  puts github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/tags?access_token=")
+
   @versions ||= github_api_authenticated_get("https://api.github.com/repos/yivo/peatio-test/tags?access_token=").map do |x|
     Gem::Version.new(x.fetch("name"))
   end.sort
