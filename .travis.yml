@@ -1,10 +1,7 @@
 dist: trusty
 
 env:
-  - BOT_USERNAME=yivo
-  - BOT_NAME=Peatio Test (Yaroslav Konoplov)
-  - BOT_EMAIL=eahome00@gmail.com
-  - REPOSITORY_SLUG=yivo/peatio-test
+  - BOT_USERNAME=yivo BOT_NAME="Peatio Test (Yaroslav Konoplov)" BOT_EMAIL=eahome00@gmail.com REPOSITORY_SLUG=yivo/peatio-test
 
 language: ruby
 
