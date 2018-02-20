@@ -4,7 +4,13 @@ require "json"
 require "uri"
 
 def bump_from_master_branch
-  versions.last.yield_self { |version| version if version.segments[1...3] == [0, 0] }
+  return unless (latest_version = versions.last)
+
+  linked_branch = version_specific_branches.find { |b| b[:version].segments == latest_version.segments[0...2] }
+  return if linked_branch
+
+  candidate_version = Gem::Version.new(latest_version.segments.dup.tap { |s| s[1] += 1; s[2] = 0 }.join("."))
+  tag_n_push(candidate_version.to_s) unless versions.include?(candidate_version)
 end
 
 def bump_from_version_specific_branch(name)
@@ -30,14 +36,13 @@ def tag_n_push(tag)
 end
 
 def versions
-  JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/tags"))).map do |x|
+  @versions ||= JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/tags"))).map do |x|
     Gem::Version.new(x.fetch("name"))
   end.sort
 end
 
 def version_specific_branches
-  branches = JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/branches")))
-  branches.map do |x|
+  @branches ||= JSON.load(Net::HTTP.get(URI.parse("https://api.github.com/repos/yivo/peatio-test/branches"))).map do |x|
     if x.fetch("name") =~ /\A(\d)-(\d)-\w+\z/
       { name: x["name"], version: Gem::Version.new($1 + "." + $2) }
     end
